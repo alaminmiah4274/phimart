@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "debug_toolbar",
+    "django_filters",
     "api",
     "product",
     "users",
@@ -138,4 +139,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False}
+REST_FRAMEWORK = {
+    "COERCE_DECIMAL_TO_STRING": False,
+}
