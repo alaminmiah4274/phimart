@@ -16,3 +16,9 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+""" 
+admin@admin.com: 1234
+test@user.com: User@2024
+"""
