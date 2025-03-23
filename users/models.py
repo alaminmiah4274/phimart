@@ -7,6 +7,7 @@ from users.managers import CustomUserManager
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
+    address = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
 
     USERNAME_FIELD = "email"  # use email instead of username
@@ -21,4 +22,6 @@ class User(AbstractUser):
 """ 
 admin@admin.com: 1234
 test@user.com: User@2024
+check@user.com: Check@2024
+django@djoser.com: Zoser@2024
 """
