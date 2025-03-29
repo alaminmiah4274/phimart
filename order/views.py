@@ -5,21 +5,31 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     DestroyModelMixin,
 )
-from order.models import Cart, CartItem
-from order.serializers import (
-    CartSerializer,
-    CartItemSerializer,
-    AddCartItemSerializer,
-    UpdateCartItemSerializer,
-)
+from order.models import Cart, CartItem, Order, OrderItem
+from rest_framework.permissions import IsAuthenticated
+from api.permissions import IsAdminOrReadOnly
+from rest_framework.decorators import action
+from order.services import OrderService
+from rest_framework.response import Response
+from order import serializers
 
 
 # Create your views here.
 class CartViewSet(
     CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet
 ):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+    # queryset = Cart.objects.all()
+    serializer_class = serializers.CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    # admin cart_id = 548e31a4-e946-43d1-b964-80d875d2658c
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        return Cart.objects.prefetch_related("items__product").filter(
+            user=self.request.user
+        )
 
 
 class CartItemViewSet(ModelViewSet):
@@ -28,13 +38,62 @@ class CartItemViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return AddCartItemSerializer
+            return serializers.AddCartItemSerializer
         elif self.request.method == "PATCH":
-            return UpdateCartItemSerializer
-        return CartItemSerializer
+            return serializers.UpdateCartItemSerializer
+        return serializers.CartItemSerializer
 
     def get_serializer_context(self):
         return {"cart_id": self.kwargs["cart_pk"]}
 
     def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs["cart_pk"])
+        return CartItem.objects.select_related("product").filter(
+            cart_id=self.kwargs["cart_pk"]
+        )
+
+
+class OrderViewSet(ModelViewSet):
+    # queryset = Order.objects.all()
+    # serializer_class = OrderSerializer
+    # permission_classes = [IsAuthenticated]
+    http_method_names = ["post", "get", "delete", "patch"]
+
+    def get_permissions(self):
+        if self.action in ["update_status", "destroy"]:
+            return [IsAdminOrReadOnly()]
+        return [IsAuthenticated()]
+
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+        OrderService.cancel_order(user=request.user, order=order)
+        return Response({"status": "Order cancelled successfully"})
+
+    @action(detail=True, methods=["patch"])
+    def update_status(self, request, pk=None):
+        order = self.get_object()
+        serializer = serializers.UpdateOrderSerializer(
+            order, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"status": f"Order status updated to {request.data['status']}"})
+
+    def get_serializer_class(self):
+        if self.action == "cancel":
+            return serializers.EmptySerializer
+        if self.action == "create":
+            return serializers.CreateOrderSerializer
+        if self.action == "update_status":
+            return serializers.UpdateOrderSerializer
+        return serializers.OrderSerializer
+
+    def get_serializer_context(self):
+        return {"user_id": self.request.user.id, "user": self.request.user}
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Order.objects.prefetch_related("items__product").all()
+        return Order.objects.prefetch_related("items__product").filter(
+            user=self.request.user
+        )

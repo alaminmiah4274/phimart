@@ -30,7 +30,7 @@ class UserSerializer(BaseUserSerializer):
 
 
 """ 
-ENDPOINTS:-->
+USER ENDPOINTS:-->
 user registration: auth/users
 user login: auth/jwt/create
 current user: auth/users/me
