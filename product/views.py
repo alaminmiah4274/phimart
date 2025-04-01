@@ -2,12 +2,13 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from product.models import Product, Category, Review
+from product.models import Product, Category, Review, ProductImage
 from rest_framework import status
 from product.serializers import (
     ProductModelSerializer,
     CategoryModelSerializer,
     ReviewModelSerializer,
+    ProductImageSerializer,
 )
 from django.db.models import Count
 from rest_framework.views import APIView
@@ -26,6 +27,7 @@ from rest_framework.permissions import (
     DjangoModelPermissionsOrAnonReadOnly,
 )
 from product.permissions import IsReviewAuthorOrReadOnly
+from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 # def view_product(request):
@@ -114,6 +116,14 @@ class ProductList(ListCreateAPIView):
 
 
 class ProductViewSet(ModelViewSet):
+    """
+    API endpoint for managing products in the e-commerce store
+     - Allows authenticated admin to create, update and delete product
+     - Allows users to browse and filter products
+     - Support searching by name, description and category
+     - Support ordering by price and updated_at
+    """
+
     queryset = Product.objects.all()
     serializer_class = ProductModelSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -141,6 +151,21 @@ class ProductViewSet(ModelViewSet):
     #         queryset = Product.objects.filter(category_id=category_id)
 
     #     return queryset
+
+    @swagger_auto_schema(operation_summary="Retrieve a list of products")
+    def list(self, request, *args, **kwargs):
+        """Retrieve all products"""
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Create a product by admin",
+        operation_description="This allow an admin to create a product",
+        request_body=ProductModelSerializer,
+        responses={201: ProductModelSerializer, 400: "Bad Request"},
+    )
+    def create(self, request, *args, **kwargs):
+        """Only authenticated admin can create product"""
+        return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
@@ -327,7 +352,21 @@ class ReviewViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return Review.objects.filter(product_id=self.kwargs["product_pk"])
+        return Review.objects.filter(product_id=self.kwargs.get("product_pk"))
 
     def get_serializer_context(self):
-        return {"product_id": self.kwargs["product_pk"]}
+        return {"product_id": self.kwargs.get("product_pk")}
+
+
+""" PRODUCT IMAGE VIEW SET """
+
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id=self.kwargs.get("product_pk"))
+
+    def perform_create(self, serializer):
+        serializer.save(product_id=self.kwargs.get("product_id"))

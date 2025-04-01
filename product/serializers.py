@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from decimal import Decimal
-from product.models import Category, Product, Review
+from product.models import Category, Product, Review, ProductImage
 from django.contrib.auth import get_user_model
+
+
+""" CATEGORY SERIALIZER """
 
 
 # class CategorySerializer(serializers.Serializer):
@@ -22,7 +25,10 @@ class CategoryModelSerializer(serializers.ModelSerializer):
     #     count = Product.objects.filter(category=category).count()
     #     return count
 
-    product_count = serializers.IntegerField(read_only=True)
+    product_count = serializers.IntegerField(
+        read_only=True,
+        help_text="return the number of the products in this category",
+    )
 
 
 # class ProductSerializer(serializers.Serializer):
@@ -46,7 +52,18 @@ class CategoryModelSerializer(serializers.ModelSerializer):
 #         return round(product.price * Decimal(1.1), 2)
 
 
+""" PRODUCT SERIALIZER """
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["id", "image"]
+
+
 class ProductModelSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Product
         # fields = "__all__"
@@ -58,6 +75,7 @@ class ProductModelSerializer(serializers.ModelSerializer):
             "stock",
             "category",
             "price_with_tax",
+            "images",
         ]
 
     # category = serializers.HyperlinkedRelatedField(
@@ -80,6 +98,9 @@ class ProductModelSerializer(serializers.ModelSerializer):
     #     if field_name["password1"] != field_name["password2"]:
     #         raise serializers.ValidationError("password did not match")
     #     return field_name
+
+
+""" REVIEW AND RELATED SERIALIZER """
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):

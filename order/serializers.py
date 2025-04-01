@@ -4,14 +4,7 @@ from product.models import Product
 from order.services import OrderService
 
 
-class EmptySerializer(serializers.Serializer):
-    pass
-
-
-class SimpleProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ["id", "name", "price"]
+""" CART SERIALIZER """
 
 
 class AddCartItemSerializer(serializers.ModelSerializer):
@@ -48,6 +41,12 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
         fields = ["quantity"]
 
 
+class SimpleProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ["id", "name", "price"]
+
+
 class CartItemSerializer(serializers.ModelSerializer):
     # product_price = serializers.SerializerMethodField(method_name="get_product_price")
 
@@ -77,6 +76,13 @@ class CartSerializer(serializers.ModelSerializer):
     def get_total_price(self, cart):
         price = sum([item.product.price * item.quantity for item in cart.items.all()])
         return price
+
+
+""" ORDER SERIALIZER """
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
 
 
 class CreateOrderSerializer(serializers.Serializer):
