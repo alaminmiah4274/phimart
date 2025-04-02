@@ -13,7 +13,7 @@ PhiMart is a robust e-commerce API built with Django REST Framework that provide
 - **Shopping Cart** functionality
 - **Order Processing** system
 - **Swagger Documentation** with drf_yasg
-- RESTful API design
+- **RESTful** API design
 
 ## API Documentation
 
