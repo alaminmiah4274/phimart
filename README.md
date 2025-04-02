@@ -62,26 +62,22 @@ EMAIL_HOST=your_email
    source venv/bin/activate
    ```
 3. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
-4. Configure environment variables:
-   Create a `.env` file in the project root and add your configuration:
+
+4. Run migrations:
    ```bash
-   SECRET_KEY=your-secret-key-here
-   DEBUG=True
+   python manage.py migrate
    ```
-5. Run migrations:
-   ```bash
-   python3 manage.py migrate
-   ```
-6. Create a superuser:
+5. Create a superuser:
    ```bash
    python manage.py createsuperuser
    ```
-7. Run the development server:
+6. Run the development server:
    ```bash
-   python3 manage.py runserver
+   python manage.py runserver
    ```
 
 ## Contributing
