@@ -369,4 +369,4 @@ class ProductImageViewSet(ModelViewSet):
         return ProductImage.objects.filter(product_id=self.kwargs.get("product_pk"))
 
     def perform_create(self, serializer):
-        serializer.save(product_id=self.kwargs.get("product_id"))
+        serializer.save(product_id=self.kwargs.get("product_pk"))

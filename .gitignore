@@ -1,3 +1,5 @@
 __pycache__/
 .phi_env/
 token.json
+db.sqlite3
+.env
