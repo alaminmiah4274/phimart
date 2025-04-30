@@ -15,6 +15,7 @@ from order import serializers
 from rest_framework import status
 from rest_framework.decorators import api_view
 from sslcommerz_lib import SSLCOMMERZ
+from decouple import config
 
 
 """ CART VIEWSET """
@@ -134,8 +135,8 @@ def initiate_payment(request):
     order_id = request.data.get("orderId")
     num_items = request.data.get("numItems")
     settings = {
-        "store_id": "phima6811047d5e262",
-        "store_pass": "phima6811047d5e262@ssl",
+        "store_id": config("store_id"),
+        "store_pass": config("store_pass"),
         "issandbox": True,
     }
     sslcz = SSLCOMMERZ(settings)
@@ -143,9 +144,9 @@ def initiate_payment(request):
     post_body["total_amount"] = amount
     post_body["currency"] = "BDT"
     post_body["tran_id"] = f"txn_{order_id}"
-    post_body["success_url"] = "http://localhost:5174/dashboard/payment/success/"
-    post_body["fail_url"] = "http://localhost:5174/dashboard/payment/fail/"
-    post_body["cancel_url"] = "http://localhost:5174/dashboard/orders/"
+    post_body["success_url"] = "http://localhost:5173/dashboard/payment/success/"
+    post_body["fail_url"] = "http://localhost:5173/dashboard/payment/fail/"
+    post_body["cancel_url"] = "http://localhost:5173/dashboard/orders/"
     post_body["emi_option"] = 0
     post_body["cus_name"] = f"{user.first_name} {user.last_name}"
     post_body["cus_email"] = user.email
