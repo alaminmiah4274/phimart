@@ -17,7 +17,7 @@ from rest_framework.decorators import api_view
 from sslcommerz_lib import SSLCOMMERZ
 from decouple import config
 from django.conf import settings as main_settings
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
 
 
 """ CART VIEWSET """
@@ -147,8 +147,8 @@ def initiate_payment(request):
     post_body["currency"] = "BDT"
     post_body["tran_id"] = f"txn_{order_id}"
     post_body["success_url"] = f"{main_settings.BACKEND_URL}/api/v1/payment/success/"
-    post_body["fail_url"] = "http://localhost:5173/dashboard/payment/fail/"
-    post_body["cancel_url"] = "http://localhost:5173/dashboard/orders/"
+    post_body["fail_url"] = f"{main_settings.BACKEND_URL}/api/v1/payment/fail/"
+    post_body["cancel_url"] = f"{main_settings.BACKEND_URL}/api/v1/payment/cancel/"
     post_body["emi_option"] = 0
     post_body["cus_name"] = f"{user.first_name} {user.last_name}"
     post_body["cus_email"] = user.email
@@ -181,4 +181,14 @@ def payment_success(request):
     order = Order.objects.get(id=order_id)
     order.status = "Ready To Ship"
     order.save()
-    return redirect(f"{main_settings.FRONTEND_URL}/dashboard/orders")
+    return HttpResponseRedirect(f"{main_settings.FRONTEND_URL}/dashboard/orders")
+
+
+@api_view(["POST"])
+def payment_cancel(request):
+    return HttpResponseRedirect(f"{main_settings.FRONTEND_URL}/dashboard/orders")
+
+
+@api_view(["POST"])
+def payment_fail(request):
+    return HttpResponseRedirect(f"{main_settings.FRONTEND_URL}/dashboard/orders")

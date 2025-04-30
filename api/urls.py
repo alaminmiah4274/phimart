@@ -9,7 +9,13 @@ from product.views import (
 )
 from order.views import CartViewSet, OrderViewSet
 from rest_framework_nested import routers
-from order.views import CartItemViewSet, initiate_payment, payment_success
+from order.views import (
+    CartItemViewSet,
+    initiate_payment,
+    payment_success,
+    payment_cancel,
+    payment_fail,
+)
 
 
 # router = SimpleRouter()
@@ -50,4 +56,6 @@ urlpatterns = [
     path("", include(cart_router.urls)),
     path("payment/initiate/", initiate_payment, name="payment-initiate"),
     path("payment/success/", payment_success, name="payment-success"),
+    path("payment/cancel/", payment_cancel, name="payment-cancel"),
+    path("payment/fail/", payment_fail, name="payment-fail"),
 ]
