@@ -15,6 +15,7 @@ from order.views import (
     payment_success,
     payment_cancel,
     payment_fail,
+    HasOrderedProduct,
 )
 
 
@@ -58,4 +59,5 @@ urlpatterns = [
     path("payment/success/", payment_success, name="payment-success"),
     path("payment/cancel/", payment_cancel, name="payment-cancel"),
     path("payment/fail/", payment_fail, name="payment-fail"),
+    path("orders/has-ordered/<int:product_id>/", HasOrderedProduct.as_view()),
 ]
